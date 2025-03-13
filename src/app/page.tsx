@@ -1,13 +1,17 @@
 import React from 'react'
 
-import { Button } from '@/components/ui/button'
+import LandmarkContainer from '@/components/Home/LandmarkContainer'
+import { Suspense } from 'react'
+import LoadingCard from '@/components/Card/LoadingCard'
 
-const HomePage = () => {
+const HomePage = async ({ searchParams }: { searchParams: { search?: string, category?: string } }) => {
+  const { search, category } = await searchParams;
   return (
-    <>
-      <div>HomePage</div>
-      <Button variant={'outline'}>Submit</Button>
-    </>
+    <section>
+      <Suspense fallback={<LoadingCard />}>
+        <LandmarkContainer search={search} category={category} />
+      </Suspense>
+    </section>
 
   )
 }

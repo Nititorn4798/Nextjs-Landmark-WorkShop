@@ -3,10 +3,11 @@ import FormInput from '@/components/Form/FormInput'
 import { SubmitButton } from '@/components/Form/Buttons'
 import FormContainer from '@/components/Form/FormContainer'
 import { createLandmarkAction } from '@/actions/actions'
-
 import CategoryInput from '@/components/Form/CategoryInput'
 import TextAreaInput from '@/components/Form/TextAreaInput'
 import ProvinceInput from '@/components/Form/ProvinceInput'
+import ImageInput from '@/components/Form/ImageInput';
+import MapLandmark from "@/components/Map/MapLandmark";
 
 const CreateProfile = async () => {
 
@@ -31,6 +32,11 @@ const CreateProfile = async () => {
             />
             <ProvinceInput />
           </div>
+
+          <ImageInput />
+
+          <MapLandmark />
+
           <div className='grid md:grid-cols-2 gap-4 mt-4'>
             <SubmitButton text="Create Landmark" size="sm" />
           </div>
