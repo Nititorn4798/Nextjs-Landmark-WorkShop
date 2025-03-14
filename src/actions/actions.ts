@@ -177,7 +177,7 @@ export const toggleFavoriteAction = async (prevState: {
         ? "Successfully Removed from favorites"
         : "Successfully Added favorites",
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return renderError(error);
   }
 };
@@ -283,7 +283,10 @@ export const editLandmarkAction = async (
     });
 
     redirect("/");
-  } catch (error) {
-    return { message: "An error occurred", error: error.message };
+  } catch (error: unknown) {
+    return {
+      message: "An error occurred",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 };
