@@ -1,4 +1,4 @@
-import { z, ZodSchema } from "zod";
+import { z, ZodSchema, SafeParseReturnType } from "zod";
 
 export const profileSchema = z.object({
   firstname: z
@@ -21,6 +21,17 @@ const validateImage = () => {
 
 export const imageSchema = z.object({
   image: validateImage(),
+});
+
+export const imageSchemaV2 = z.object({
+  image: z
+    .instanceof(File)
+    .refine((file) => {
+      return file.size <= 10 * 1024 * 1024; // 10MB
+    }, "File size must be less than 10MB")
+    .refine((file) => {
+      return ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+    }, "Only .jpg, .png, and .webp formats are supported."),
 });
 
 export const landmarkSchema = z.object({
@@ -46,4 +57,30 @@ export const validateWithZod = <T>(schema: ZodSchema<T>, data: unknown): T => {
     throw new Error(errors.join(","));
   }
   return result.data;
+};
+
+interface ValidationResult<T> {
+  success: boolean;
+  data?: T;
+  error?: { message: string };
+}
+
+export const validateWithZodV2 = <T>(
+  schema: ZodSchema<T>,
+  data: unknown
+): ValidationResult<T> => {
+  const result: SafeParseReturnType<unknown, T> = schema.safeParse(data);
+
+  if (!result.success) {
+    const errors = result.error.errors.map((error) => error.message);
+    return {
+      success: false,
+      error: { message: errors.join(", ") },
+    };
+  }
+
+  return {
+    success: true,
+    data: result.data,
+  };
 };

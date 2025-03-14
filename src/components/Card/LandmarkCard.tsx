@@ -24,7 +24,7 @@ const LandmarkCard = ({ Landmark }: { Landmark: LandmarkCardProps }) => {
           <h3 className='text-sm font-semibold capitalize mt-1'>{name.substring(0, 30)}</h3>
           <LandmarkRating />
         </div>
-        <div className='text-sm mt-1 text-muted-foreground flex-grow overflow-y-auto max-h-[100px]'>
+        <div className='text-sm mt-1 text-muted-foreground flex-grow overflow-y-auto h-[100px] max-h-[100px]'>
           {description.substring(0, 500)}
         </div>
         <div className='mt-1 text-sm flex items-center justify-between font-semibold'>

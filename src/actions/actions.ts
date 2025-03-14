@@ -2,9 +2,11 @@
 
 import {
   imageSchema,
+  imageSchemaV2,
   landmarkSchema,
   profileSchema,
   validateWithZod,
+  validateWithZodV2,
 } from "@/utils/schemas";
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import db from "@/utils/db";
@@ -75,14 +77,11 @@ export const createLandmarkAction = async (
 
     const rawData = Object.fromEntries(formdata);
     const file = formdata.get("image") as File;
-    // step 1 validate data
     const validateField = validateWithZod(landmarkSchema, rawData);
     const validatedFile = validateWithZod(imageSchema, { image: file });
 
-    // step 2 Upload Image To Supabase
     const fullPath = await uploadFile(validatedFile.image);
-    // console.log(fullPath);
-    // step 3 Insert to db
+
     await db.landmark.create({
       data: {
         ...validateField,
@@ -91,9 +90,8 @@ export const createLandmarkAction = async (
       },
     });
 
-    // return { message: "Create Landmark Success!!!" };
+    // return { message: "Create Landmark Successful" };
   } catch (error) {
-    // console.log(error);
     return renderError(error);
   }
   redirect("/");
@@ -218,4 +216,74 @@ export const fetchLandmarkDetail = async ({ id }: { id: string }) => {
       profile: true,
     },
   });
+};
+
+// Add Landmark edit action https://youtu.be/AgXuYmbL6mQ?t=2185
+export const editLandmarkAction = async (
+  id: string,
+  formdataDialog: FormData
+): Promise<{ message: string; error?: string }> => {
+  try {
+    const user = await getAuthUser();
+    if (!user) {
+      return {
+        message: "You must be logged in to access this page",
+        error: "Authentication failed",
+      };
+    }
+
+    const landmark = await db.landmark.findFirst({
+      where: {
+        AND: [{ profileId: user.id }, { id: id }],
+      },
+      select: { id: true, image: true },
+    });
+
+    if (!landmark) {
+      return {
+        message: "Landmark not found or you don't have permission to edit it.",
+        error: "Permission denied",
+      };
+    }
+
+    const rawData = Object.fromEntries(formdataDialog);
+    const file = formdataDialog.get("image") as File;
+
+    const validateField = validateWithZodV2(landmarkSchema, rawData);
+    if (!validateField.success) {
+      return {
+        message: "Validation error",
+        error: validateField.error?.message || "Unknown validation error",
+      };
+    }
+
+    let imagePath = landmark.image;
+
+    if (file.size > 0) {
+      const validatedFile = validateWithZodV2(imageSchemaV2, { image: file });
+      if (!validatedFile.success) {
+        return {
+          message: "Invalid image file",
+          error:
+            validatedFile.error?.message || "Unknown image validation error",
+        };
+      }
+      if (validatedFile.data) {
+        const fullPath = await uploadFile(validatedFile.data.image);
+        imagePath = fullPath;
+      }
+    }
+
+    await db.landmark.update({
+      where: { id: id },
+      data: {
+        ...validateField.data,
+        image: imagePath,
+      },
+    });
+
+    redirect("/");
+  } catch (error) {
+    return { message: "An error occurred", error: error.message };
+  }
 };
