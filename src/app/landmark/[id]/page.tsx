@@ -7,16 +7,27 @@ import ImageContainer from "@/components/Landmark/ImageContainer";
 import Description from "@/components/Landmark/Description";
 import MapLandmark from "@/components/Map/MapLandmark";
 import ShareButton from "@/components/Landmark/ShareButton";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { getAuthUser } from "@/actions/actions";
 
 const LandmarkDetail = async ({ params }: { params: { id: string } }) => {
   const { id } = await params;
   const landmark = await fetchLandmarkDetail({ id });
   if (!landmark) redirect("/");
+  const user = await getAuthUser();
 
   return (
     <section>
       <div className="flex justify-between">
         <Breadcrumbs name={landmark.name} />
+        {landmark.profileId == user.id ? (
+          <Link href={`/landmark/${id}/edit`}>
+            <Button variant="outline">Edit Landmark</Button>
+          </Link>
+        ) : (
+          <Button variant="ghost">View Landmark</Button>
+        )}
       </div>
 
       <header>

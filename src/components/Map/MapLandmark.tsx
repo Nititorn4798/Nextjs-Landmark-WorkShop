@@ -60,19 +60,41 @@ const MapLandmark = ({
     <>
       <h1 className="mt-4 mb-2 font-semibold">Where are you?</h1>
 
-      <input type="hidden" name="lat" value={position ? position[0] : ""} />
-      <input type="hidden" name="lng" value={position ? position[1] : ""} />
+      <input
+        type="hidden"
+        name="lat"
+        value={
+          position
+            ? position[0] !== undefined
+              ? position[0]
+              : ""
+            : location && location.lat !== undefined
+            ? location.lat
+            : ""
+        }
+      />
+      <input
+        type="hidden"
+        name="lng"
+        value={
+          position
+            ? position[1] !== undefined
+              ? position[1]
+              : ""
+            : location && location.lng !== undefined
+            ? location.lng
+            : ""
+        }
+      />
 
       <MapContainer
         className="h-[50vh] rounded-lg z-0 relative mb-2"
         center={location || defaultLocation}
-        zoom={7}
+        zoom={9}
         scrollWheelZoom={true}
       >
         <Marker position={location || defaultLocation} icon={markerIcon}>
-          <Popup>
-            A pretty CSS3 popup. <br /> Easily customizable.
-          </Popup>
+          <Popup>ตำแหน่งของเป้าหมาย</Popup>
         </Marker>
 
         <LocationMarker position={position} setPosition={setPosition} />

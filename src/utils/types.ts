@@ -1,7 +1,7 @@
 export type actionFunction = (
   prevState: unknown,
   formData: FormData
-) => Promise<{ message: string }>;
+) => Promise<{ message: string; error?: string }>;
 
 export type LandmarkCardProps = {
   id: string;

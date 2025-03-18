@@ -14,7 +14,7 @@ import { redirect } from "next/navigation";
 import { uploadFile } from "@/utils/supabase";
 import { revalidatePath } from "next/cache";
 
-const getAuthUser = async () => {
+export const getAuthUser = async () => {
   const user = await currentUser();
   if (!user) {
     throw new Error("You must be logged in to access this page");
@@ -39,8 +39,10 @@ export const createProfileAction = async (
   formdata: FormData
 ) => {
   try {
-    const user = await getAuthUser();
-
+    const user = await currentUser();
+    if (!user) {
+      throw new Error("You must be logged in to access this page");
+    }
     const rawData = Object.fromEntries(formdata);
     const validateField = validateWithZod(profileSchema, rawData);
     // console.log("Validated ", validateField);
@@ -61,7 +63,7 @@ export const createProfileAction = async (
       },
     });
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     return renderError(error);
   }
   redirect("/");
@@ -100,9 +102,11 @@ export const createLandmarkAction = async (
 export const fetchLandmarks = async ({
   search = "",
   category,
+  profileId,
 }: {
   search?: string;
   category?: string;
+  profileId?: string;
 }) => {
   const landmarks = await db.landmark.findMany({
     where: {
@@ -111,6 +115,7 @@ export const fetchLandmarks = async ({
         { name: { contains: search, mode: "insensitive" } },
         { description: { contains: search, mode: "insensitive" } },
       ],
+      profileId,
     },
     orderBy: {
       createdAt: "desc",
@@ -220,9 +225,17 @@ export const fetchLandmarkDetail = async ({ id }: { id: string }) => {
 
 // Add Landmark edit action https://youtu.be/AgXuYmbL6mQ?t=2185
 export const editLandmarkAction = async (
-  id: string,
-  formdataDialog: FormData
+  prevState: unknown,
+  formdata: FormData
 ): Promise<{ message: string; error?: string }> => {
+  const id = formdata.get("landmarkId") as string;
+  console.log(formdata.get("lat") as string);
+  console.log(formdata.get("lng") as string);
+  // console.log(id);
+  // return {
+  //   message: "Test Edit",
+  //   error: "Error เว้ย",
+  // };
   try {
     const user = await getAuthUser();
     if (!user) {
@@ -246,8 +259,8 @@ export const editLandmarkAction = async (
       };
     }
 
-    const rawData = Object.fromEntries(formdataDialog);
-    const file = formdataDialog.get("image") as File;
+    const rawData = Object.fromEntries(formdata);
+    const file = formdata.get("image") as File;
 
     const validateField = validateWithZodV2(landmarkSchema, rawData);
     if (!validateField.success) {
@@ -282,7 +295,14 @@ export const editLandmarkAction = async (
       },
     });
 
-    redirect("/");
+    // redirect("/");
+    revalidatePath("/landmark/[id]/edit");
+    revalidatePath("/landmark");
+    revalidatePath("/");
+    return {
+      message: "Edit Landmark successful",
+      error: "Edit Successful",
+    };
   } catch (error: unknown) {
     return {
       message: "An error occurred",

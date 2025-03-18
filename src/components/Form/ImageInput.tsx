@@ -1,18 +1,29 @@
-import React from 'react'
+import React from "react";
 
-import { Label } from '../ui/label'
-import { Input } from '../ui/input'
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 
-const ImageInput = () => {
-  const name = "image"
+const ImageInput = ({
+  name = "image",
+  label = "image",
+  isRequired = true,
+}: {
+  name?: string;
+  label?: string;
+  isRequired?: boolean;
+}) => {
   return (
     <div>
-      <Label className='capitalize'>
-        {name}
-      </Label>
-      <Input id={name} name={name} type="file" required accept='image/*' />
+      <Label className="mb-2 capitalize">{label}</Label>
+      <Input
+        id={name}
+        name={name}
+        type="file"
+        {...(isRequired ? { required: true } : {})}
+        accept="image/*"
+      />
     </div>
-  )
-}
+  );
+};
 
-export default ImageInput
+export default ImageInput;

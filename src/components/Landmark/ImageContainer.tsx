@@ -1,19 +1,27 @@
-import Image from 'next/image';
-import React from 'react'
+import Image from "next/image";
+import React from "react";
 
-const ImageContainer = ({ mainImage, name }: { mainImage: string, name: string; }) => {
+const ImageContainer = ({
+  mainImage,
+  name,
+  sizes = "100vw",
+}: {
+  mainImage: string;
+  name: string;
+  sizes?: string;
+}) => {
   return (
-    <section className='h-[300px] md:h-[500px] relative mt-8'>
+    <section className="h-[300px] md:h-[500px] relative mt-8">
       <Image
         src={mainImage}
-        sizes='100vw'
+        sizes={sizes}
         alt={name}
         fill
         priority
-        className='object-cover rounded-md '
+        className="object-cover rounded-md "
       />
     </section>
-  )
-}
+  );
+};
 
-export default ImageContainer
+export default ImageContainer;
